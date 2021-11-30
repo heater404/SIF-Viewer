@@ -17,15 +17,6 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ToggleGroup))]
 public class MiniViewGroup : UIView
 {
-    public class MiniViewAddEvent : UnityEvent
-    {
-        public MiniViewAddEvent()
-        {
-        }
-    }
-
-    public MiniViewAddEvent OnMiniViewAdd = new MiniViewAddEvent();
-
     public MiniView prefab;
 
     private ObservableList<MiniViewViewModel> miniViewViewModels = new ObservableList<MiniViewViewModel>();
@@ -41,7 +32,6 @@ public class MiniViewGroup : UIView
                 this.miniViewViewModels.CollectionChanged -= OnCollectionChanged;
 
             this.miniViewViewModels = value;
-
             this.OnItemsChanged();
 
             if (this.miniViewViewModels != null)
@@ -53,17 +43,22 @@ public class MiniViewGroup : UIView
     {
         if (NotifyCollectionChangedAction.Add == e.Action)
         {
-            MiniView miniview = Instantiate(prefab, this.transform);
-            miniview.GetComponent<Toggle>().group = this.GetComponent<ToggleGroup>();
-            miniview.SetDataContext(e.NewItems[0]);
+            AddMiniView((MiniViewViewModel)e.NewItems[0]);
         }
+    }
+
+    private void AddMiniView(MiniViewViewModel model)
+    {
+        MiniView miniview = Instantiate(prefab, this.transform);
+        miniview.GetComponent<Toggle>().group = this.GetComponent<ToggleGroup>();
+        miniview.SetDataContext(model);
     }
 
     protected virtual void OnItemsChanged()
     {
         for (int i = 0; i < this.miniViewViewModels.Count; i++)
         {
-            Debug.Log("this.AddItem");
+            AddMiniView(MiniViewViewModels[i]);
         }
     }
 
@@ -88,7 +83,10 @@ public class MiniViewGroup : UIView
         bindingSet.Build();
 
         viewModel.AddMiniView(new MiniViewViewModel("Depth"));
-        viewModel.AddMiniView(new MiniViewViewModel("Gray",true));
+        viewModel.AddMiniView(new MiniViewViewModel("Gray"));
         viewModel.AddMiniView(new MiniViewViewModel("Bg"));
+
+        viewModel.Select("Bg");
     }
 }
+
